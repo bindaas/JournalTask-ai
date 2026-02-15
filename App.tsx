@@ -18,6 +18,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
+  // Read Project ID from environment if available
+  const projectId = (process.env as any).GOOGLE_CLOUD_PROJECT || 'Development';
+
   // Persistence: Load on mount
   useEffect(() => {
     const savedTasks = localStorage.getItem(STORAGE_KEY_TASKS);
@@ -273,14 +276,14 @@ const App: React.FC = () => {
       {/* Persistent Status Bar */}
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40 py-2">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          <div className="flex items-center space-x-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span>Cloud Connected</span>
+            <span>Cloud Connected: <span className="text-slate-600">{projectId}</span></span>
           </div>
           <div className="flex items-center space-x-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
              <a href="#" className="hover:text-blue-600">Privacy</a>
              <a href="#" className="hover:text-blue-600">Help Center</a>
-             <span className="opacity-50">v1.0.4-Stable</span>
+             <span className="opacity-50">v1.0.5-Stable</span>
           </div>
         </div>
       </footer>

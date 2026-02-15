@@ -2,7 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ExtractionResult, TaskStatus } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always use the API key directly from process.env.API_KEY as per guidelines
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const extractionSchema = {
   type: Type.OBJECT,
@@ -35,6 +36,7 @@ const extractionSchema = {
 
 export async function extractTasksFromJournal(content: string): Promise<ExtractionResult> {
   try {
+    // Generate content using the recommended model for basic text tasks
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `
@@ -55,6 +57,7 @@ export async function extractTasksFromJournal(content: string): Promise<Extracti
       }
     });
 
+    // Access the .text property directly as per guidelines (not a method)
     const text = response.text || '{"tasks": []}';
     return JSON.parse(text) as ExtractionResult;
   } catch (error) {
