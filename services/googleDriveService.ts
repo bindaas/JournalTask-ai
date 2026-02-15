@@ -24,37 +24,34 @@ export async function pickFileFromDrive(): Promise<string | null> {
   const CLIENT_ID = getClientId();
 
   if (!CLIENT_ID) {
-    throw new Error('Missing Google Client ID. Click the gear icon to set it up.');
+    throw new Error('Missing Google Client ID. Click the shield icon in settings to configure.');
   }
 
-  // Basic format check for Client ID
   if (!CLIENT_ID.endsWith('.apps.googleusercontent.com')) {
-    throw new Error('Invalid Client ID format. It should end with ".apps.googleusercontent.com"');
+    throw new Error('Invalid Client ID format. Check the settings guide.');
   }
 
   return new Promise((resolve, reject) => {
     try {
       if (!window.google?.accounts?.oauth2) {
-        throw new Error('Google Identity Services not loaded. Please check your internet connection and refresh.');
+        throw new Error('Google Identity Services not loaded. Try refreshing the page.');
       }
-
-      console.debug('Requesting OAuth token for origin:', window.location.origin);
 
       const tokenClient = window.google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: async (response: any) => {
           if (response.error !== undefined) {
+            console.error('OAuth Detail Error:', response);
             const errorMsg = response.error_description || response.error;
-            console.error('OAuth Response Error:', response);
-            reject(new Error(`Google Login Error: ${errorMsg}`));
+            reject(new Error(`OAuth Error: ${errorMsg}. Check console for details.`));
             return;
           }
           
           const accessToken = response.access_token;
           
           if (!window.gapi) {
-             reject(new Error('Google API Client (gapi) failed to load.'));
+             reject(new Error('Google GAPI loader not found.'));
              return;
           }
 
@@ -68,11 +65,8 @@ export async function pickFileFromDrive(): Promise<string | null> {
                   .setCallback(async (data: any) => {
                     if (data.action === window.google.picker.Action.PICKED) {
                       const file = data.docs[0];
-                      const fileId = file.id;
-                      const mimeType = file.mimeType;
-                      
                       try {
-                        const content = await fetchFileContent(fileId, mimeType, accessToken);
+                        const content = await fetchFileContent(file.id, file.mimeType, accessToken);
                         resolve(content);
                       } catch (err) {
                         reject(err);
@@ -84,17 +78,16 @@ export async function pickFileFromDrive(): Promise<string | null> {
                   .build();
                 picker.setVisible(true);
               } catch (pickerErr: any) {
-                reject(new Error(`Picker creation failed: ${pickerErr.message}`));
+                reject(new Error(`Picker Error: ${pickerErr.message}`));
               }
             }
           });
         },
       });
 
-      // Request token via popup
-      tokenClient.requestAccessToken({ prompt: 'consent' });
+      // Using 'select_account' is more robust for compliance than just 'consent'
+      tokenClient.requestAccessToken({ prompt: 'select_account' });
     } catch (error: any) {
-      console.error('PickFile Logic Error:', error);
       reject(error);
     }
   });
@@ -112,10 +105,7 @@ async function fetchFileContent(fileId: string, mimeType: string, accessToken: s
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('Access denied. Is the Drive API enabled in your project?');
-    }
-    throw new Error(`Google API Error: ${response.statusText} (${response.status})`);
+    throw new Error(`Drive API Error: ${response.status}`);
   }
 
   return await response.text();
@@ -125,6 +115,5 @@ declare global {
   interface Window {
     google: any;
     gapi: any;
-    process: any;
   }
 }
