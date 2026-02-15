@@ -34,16 +34,6 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
     setTimeout(() => setCopyStatus('idle'), 2000);
   };
 
-  const handleExampleLoad = () => {
-    const example = `2024-05-15:
-- ~~Update the team sync calendar~~
-- Prepare the Q3 Roadmap presentation [URGENT].
-- Research new GCP deployment strategies.
-- Need to approve the design mockups before starting front-end development.
-- Buy office supplies.`;
-    setContent(example);
-  };
-
   const handleDriveImport = async () => {
     if (!isConfigured) {
       setShowSettings(true);
@@ -60,14 +50,19 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
     } catch (error: any) {
       console.error("Drive Import Error:", error);
       const msg = error.message?.toLowerCase() || '';
-      // Error 400 invalid_request usually means origin mismatch
-      const isOAuthError = msg.includes('400') || msg.includes('invalid_request') || msg.includes('idpiframe_initialization_failed');
+      
+      // Detailed error detection for Policy Compliance
+      const isPolicyError = msg.includes('policy') || msg.includes('secure') || msg.includes('400') || msg.includes('access blocked');
       
       let alertMsg = error.message || 'An unknown error occurred';
-      if (isOAuthError) {
-        alertMsg = `Google OAuth Error 400: This usually means "${currentOrigin}" is not added to your "Authorized JavaScript origins" in the Google Cloud Console. 
-        
-Please click the gear icon and follow the 'Project Configuration Guide' to fix this.`;
+      if (isPolicyError) {
+        alertMsg = `GOOGLE POLICY ERROR DETECTED:
+
+1. YOUR EMAIL: Is your email added to 'Test users' in the GCP 'OAuth consent screen' tab? (Required for unverified apps)
+2. ORIGIN: Is '${currentOrigin}' exactly matched in 'Authorized JavaScript origins'?
+3. REDIRECTS: Is 'Authorized redirect URIs' EMPTY? (It must be empty for this app type)
+
+See the Settings gear for the step-by-step fix.`;
         setShowSettings(true);
       }
       
@@ -89,90 +84,115 @@ Please click the gear icon and follow the 'Project Configuration Guide' to fix t
         <div className="flex gap-2">
           <button 
             onClick={() => setShowSettings(!showSettings)}
-            className={`p-1.5 rounded transition-all relative ${showSettings ? 'bg-slate-200 text-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
-            title="Configure Drive"
+            className={`p-2 rounded-lg transition-all relative ${showSettings ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+            title="Google Drive Config"
           >
             <i className="fas fa-cog"></i>
             {!isConfigured && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white animate-pulse"></span>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
             )}
           </button>
           <button 
             onClick={handleDriveImport}
             disabled={isLoading}
-            className={`flex items-center text-[10px] font-bold px-3 py-1.5 rounded transition-all ${
+            className={`flex items-center text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all border ${
               !isConfigured 
-              ? 'text-slate-400 bg-slate-50 border border-slate-100' 
-              : 'text-emerald-600 hover:text-emerald-700 bg-emerald-50 border border-emerald-100'
+              ? 'text-slate-400 bg-slate-50 border-slate-100' 
+              : 'text-emerald-700 hover:bg-emerald-50 bg-white border-emerald-100'
             }`}
           >
             <i className="fab fa-google-drive mr-1.5"></i> Drive
-          </button>
-          <button 
-            onClick={handleExampleLoad}
-            disabled={isLoading}
-            className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100 transition-colors"
-          >
-            Example
           </button>
         </div>
       </div>
 
       {showSettings && (
-        <div className="mb-4 p-4 bg-slate-50 rounded-xl border border-blue-100 animate-in fade-in slide-in-from-top-1">
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex justify-between">
-            Google OAuth Client ID
-            {!isConfigured && <span className="text-amber-600 font-bold italic lowercase tracking-normal">setup required</span>}
-          </label>
-          <div className="flex gap-2">
-            <input 
-              type="text"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              placeholder="0000000-xxxx.apps.googleusercontent.com"
-              className="flex-1 px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <button 
-              onClick={handleSaveConfig}
-              className="px-4 py-2 bg-slate-800 text-white text-[10px] font-bold rounded-lg hover:bg-slate-900 transition-colors uppercase tracking-widest"
-            >
-              Save
-            </button>
+        <div className="mb-6 p-5 bg-slate-50 rounded-2xl border border-blue-100 animate-in fade-in slide-in-from-top-1">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Cloud Configuration</h4>
+              <p className="text-[10px] text-slate-500 mt-1">Configure your Google Project to enable Drive access.</p>
+            </div>
+            {!isConfigured && <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Setup Required</span>}
           </div>
-          
-          <div className="mt-3 p-3 bg-white/60 rounded-lg border border-slate-100">
-             <p className="text-[10px] font-bold text-slate-600 uppercase mb-2 flex items-center">
-               <i className="fas fa-shield-halved mr-1.5 text-blue-400"></i> Configuration Guide
-             </p>
-             <div className="mb-2 p-2 bg-blue-50/50 rounded border border-blue-100">
-                <p className="text-[9px] text-blue-700 font-bold uppercase mb-1">Authorized JavaScript Origin:</p>
-                <div className="flex items-center justify-between">
-                   <code className="text-[10px] text-slate-600 font-mono truncate mr-2">{currentOrigin}</code>
-                   <button 
-                    onClick={handleCopyOrigin}
-                    className="text-[9px] px-2 py-0.5 bg-white border border-blue-200 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition-colors flex items-center shrink-0"
-                   >
-                     <i className={`fas ${copyStatus === 'copied' ? 'fa-check' : 'fa-copy'} mr-1`}></i>
-                     {copyStatus === 'copied' ? 'Copied' : 'Copy'}
-                   </button>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Web Client ID (OAuth 2.0)</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  placeholder="0000000-xxxx.apps.googleusercontent.com"
+                  className="flex-1 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                />
+                <button 
+                  onClick={handleSaveConfig}
+                  className="px-4 py-2.5 bg-slate-800 text-white text-[10px] font-black rounded-xl hover:bg-slate-900 transition-all uppercase"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-4">
+              <h5 className="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center">
+                <i className="fas fa-shield-halved mr-2"></i> Fix "Policy Compliance" Errors
+              </h5>
+              
+              <div className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+                <div className="overflow-hidden">
+                  <p className="text-[8px] font-bold text-slate-400 uppercase">Authorized JavaScript Origin:</p>
+                  <code className="text-[10px] text-blue-600 font-mono block truncate">{currentOrigin}</code>
                 </div>
-             </div>
-             <p className="text-[9px] text-amber-700 font-bold mb-2">
-               <i className="fas fa-exclamation-triangle mr-1"></i> Fixing "Error 400: invalid_request":
-             </p>
-             <ul className="text-[9px] text-slate-500 space-y-1 list-disc pl-3">
-               <li>Visit <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">GCP Credentials</a>.</li>
-               <li>Edit your <b>OAuth 2.0 Client ID</b>.</li>
-               <li>Ensure the URL above is in <b>Authorized JavaScript origins</b>.</li>
-               <li>Enable <b>Drive</b> and <b>Picker</b> APIs.</li>
-             </ul>
+                <button 
+                  onClick={handleCopyOrigin}
+                  className="shrink-0 ml-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 hover:border-blue-500 hover:text-blue-500 transition-all"
+                >
+                  {copyStatus === 'copied' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold">1</div>
+                  <div className="text-[10px] text-slate-600 leading-normal">
+                    <p className="font-bold text-slate-800">OAuth Consent Screen Tab:</p>
+                    Add your email to <b className="text-blue-600">Test users</b> at the bottom of the page.
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold">2</div>
+                  <div className="text-[10px] text-slate-600 leading-normal">
+                    <p className="font-bold text-slate-800">Credentials Tab:</p>
+                    Edit your Client ID. Paste the <b>Origin</b> (above) into <b>Authorized JavaScript origins</b>.
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[10px] font-bold">3</div>
+                  <div className="text-[10px] text-slate-600 leading-normal">
+                    <p className="font-bold text-red-600">CRITICAL:</p>
+                    Ensure <b>Authorized redirect URIs</b> is <b className="uppercase">Empty</b>. This app uses the popup flow.
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <p className="text-[9px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg border border-amber-100 flex items-start">
+                  <i className="fas fa-circle-info mr-2 mt-0.5"></i>
+                  <span>Wait 5 minutes for Google's cache to clear after saving changes in the console.</span>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
       
       <p className="text-sm text-slate-500 mb-4 leading-relaxed">
-        Input your daily progress. Gemini AI will automatically extract tasks, deadlines, and project links.
+        Input your daily progress. Gemini AI will automatically extract tasks, deadlines, and dependencies.
       </p>
 
       <div className="relative">
