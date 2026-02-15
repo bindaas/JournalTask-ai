@@ -59,15 +59,15 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
       }
     } catch (error: any) {
       console.error("Drive Import Error:", error);
-      const msg = error.message.toLowerCase();
+      const msg = error.message?.toLowerCase() || '';
       // Error 400 invalid_request usually means origin mismatch
       const isOAuthError = msg.includes('400') || msg.includes('invalid_request') || msg.includes('idpiframe_initialization_failed');
       
-      let alertMsg = error.message;
+      let alertMsg = error.message || 'An unknown error occurred';
       if (isOAuthError) {
-        alertMsg = `Google OAuth Error 400: This usually means "${currentOrigin}" is not in your "Authorized JavaScript origins". 
+        alertMsg = `Google OAuth Error 400: This usually means "${currentOrigin}" is not added to your "Authorized JavaScript origins" in the Google Cloud Console. 
         
-Please click the gear icon and follow the 'Project Switch Guide' to fix this in your Google Cloud Console.`;
+Please click the gear icon and follow the 'Project Configuration Guide' to fix this.`;
         setShowSettings(true);
       }
       
@@ -143,7 +143,7 @@ Please click the gear icon and follow the 'Project Switch Guide' to fix this in 
           
           <div className="mt-3 p-3 bg-white/60 rounded-lg border border-slate-100">
              <p className="text-[10px] font-bold text-slate-600 uppercase mb-2 flex items-center">
-               <i className="fas fa-shield-halved mr-1.5 text-blue-400"></i> Project Switch Guide
+               <i className="fas fa-shield-halved mr-1.5 text-blue-400"></i> Configuration Guide
              </p>
              <div className="mb-2 p-2 bg-blue-50/50 rounded border border-blue-100">
                 <p className="text-[9px] text-blue-700 font-bold uppercase mb-1">Authorized JavaScript Origin:</p>
@@ -159,13 +159,13 @@ Please click the gear icon and follow the 'Project Switch Guide' to fix this in 
                 </div>
              </div>
              <p className="text-[9px] text-amber-700 font-bold mb-2">
-               <i className="fas fa-exclamation-triangle mr-1"></i> If you see "Error 400: invalid_request", ensure the URL above is EXACTLY what is saved in your GCP Credentials.
+               <i className="fas fa-exclamation-triangle mr-1"></i> Fixing "Error 400: invalid_request":
              </p>
              <ul className="text-[9px] text-slate-500 space-y-1 list-disc pl-3">
-               <li>Go to <b>APIs & Services > Credentials</b>.</li>
+               <li>Visit <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">GCP Credentials</a>.</li>
                <li>Edit your <b>OAuth 2.0 Client ID</b>.</li>
-               <li>Paste the URL above into <b>Authorized JavaScript origins</b>.</li>
-               <li>Enable <b>Drive</b>, <b>Picker</b>, and <b>Generative Language</b> APIs.</li>
+               <li>Ensure the URL above is in <b>Authorized JavaScript origins</b>.</li>
+               <li>Enable <b>Drive</b> and <b>Picker</b> APIs.</li>
              </ul>
           </div>
         </div>

@@ -1,63 +1,30 @@
-
-# JournalTask AI - Local Setup & Deployment Guide
+# JournalTask AI - Setup & Deployment
 
 An intelligent task management system powered by Gemini AI.
 
-## 🚀 Local Development Setup
+## 🚀 Local Setup
 
-### 1. Prerequisites
-- **Node.js**: Version 20 or higher.
-- **npm**: Usually comes with Node.js.
+1. **Install dependencies**: `npm install`
+2. **Configure API Key**: Create a `.env` file with `VITE_API_KEY=your_key_here`.
+3. **Run**: `npm run dev` (Usually at `http://localhost:5173`)
 
-### 2. Installation
-Open your terminal in this directory and run:
-```bash
-npm install
-```
+## 🛠 Troubleshooting Error 400 (invalid_request)
 
-### 3. Configuration
-Create a `.env` file in the root directory:
-```env
-VITE_API_KEY=YOUR_GEMINI_API_KEY
-VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_OAUTH_CLIENT_ID
-```
-*Note: You can get your Gemini API Key from [aistudio.google.com](https://aistudio.google.com/app/apikey).*
+If you see a 400 error when clicking the "Drive" button, follow these steps:
 
-### 4. Running the App
-Start the development server:
-```bash
-npm run dev
-```
-The app will typically be available at: **`http://localhost:5173`**
+1. Copy the URL where your app is running (e.g., `http://localhost:5173` or your Cloud Run URL).
+2. Go to the [Google Cloud Console Credentials Page](https://console.cloud.google.com/apis/credentials).
+3. Find your **OAuth 2.0 Client ID**.
+4. Add your URL to the **Authorized JavaScript origins** section.
+5. **Wait 5-10 minutes** for Google's servers to propagate the change.
+6. Refresh your application and try again.
 
----
+## ☁️ Deployment to Cloud Run
 
-## ☁️ Google Cloud Configuration
+This project is configured for Google Cloud Run. Use the following command to deploy:
 
-### Authorized JavaScript Origins
-When setting up your OAuth 2.0 Client ID in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
-
-1.  **For Local Dev**: Add `http://localhost:5173`
-2.  **For Production**: Add your Cloud Run URL (e.g., `https://journaltask-ai-xxxxx.a.run.app`)
-
-### Required APIs
-Ensure the following APIs are enabled in your GCP project:
-- **Generative Language API** (for Gemini)
-- **Google Drive API** (for file importing)
-- **Google Picker API** (for the file selection UI)
-
----
-
-## 🛠️ Build & Deploy
-
-### Building for Production
-```bash
-npm run build
-```
-This generates a `dist/` folder containing your static site.
-
-### Deploying to Cloud Run
-If you have the `gcloud` CLI installed:
 ```bash
 gcloud builds submit --config cloudbuild.yaml .
 ```
+
+Ensure the `Generative Language API` and `Google Drive API` are enabled in your project.
