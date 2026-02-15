@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { pickFileFromDrive } from '../services/googleDriveService';
 
@@ -61,11 +60,14 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
     } catch (error: any) {
       console.error("Drive Import Error:", error);
       const msg = error.message.toLowerCase();
-      const is400 = msg.includes('400') || msg.includes('invalid_request');
+      // Error 400 invalid_request usually means origin mismatch
+      const isOAuthError = msg.includes('400') || msg.includes('invalid_request') || msg.includes('idpiframe_initialization_failed');
       
       let alertMsg = error.message;
-      if (is400) {
-        alertMsg = `Google OAuth Error: Ensure "${currentOrigin}" is whitelisted in your GCP Console under "Authorized JavaScript origins".`;
+      if (isOAuthError) {
+        alertMsg = `Google OAuth Error 400: This usually means "${currentOrigin}" is not in your "Authorized JavaScript origins". 
+        
+Please click the gear icon and follow the 'Project Switch Guide' to fix this in your Google Cloud Console.`;
         setShowSettings(true);
       }
       
@@ -156,6 +158,9 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
                    </button>
                 </div>
              </div>
+             <p className="text-[9px] text-amber-700 font-bold mb-2">
+               <i className="fas fa-exclamation-triangle mr-1"></i> If you see "Error 400: invalid_request", ensure the URL above is EXACTLY what is saved in your GCP Credentials.
+             </p>
              <ul className="text-[9px] text-slate-500 space-y-1 list-disc pl-3">
                <li>Go to <b>APIs & Services > Credentials</b>.</li>
                <li>Edit your <b>OAuth 2.0 Client ID</b>.</li>
