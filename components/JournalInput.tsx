@@ -51,14 +51,14 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
       console.error("Drive Import Error:", error);
       const msg = error.message?.toLowerCase() || '';
       
-      // Specifically detect the Policy Compliance error string
       const isPolicyError = msg.includes('policy') || msg.includes('comply') || msg.includes('secure') || msg.includes('400');
       
       if (isPolicyError) {
         setShowSettings(true);
-        alert(`SECURITY BLOCK: Google has blocked this request because of a configuration mismatch.
+        alert(`CRITICAL SECURITY BLOCK: 
+Google is blocking this sign-in for security.
 
-Please check the red 'Security Audit' checklist in the settings panel.`);
+Common fix: Add your email to 'Test users' on the 'OAuth consent screen' tab in your Google Cloud Console.`);
       } else {
         alert(error.message || 'An unknown error occurred');
       }
@@ -79,7 +79,7 @@ Please check the red 'Security Audit' checklist in the settings panel.`);
         <div className="flex gap-2">
           <button 
             onClick={() => setShowSettings(!showSettings)}
-            className={`p-2 rounded-lg transition-all relative ${showSettings ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`p-2 rounded-lg transition-all relative ${showSettings ? 'bg-red-50 text-red-600' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <i className="fas fa-shield-halved"></i>
             {!isConfigured && (
@@ -105,15 +105,15 @@ Please check the red 'Security Audit' checklist in the settings panel.`);
           <div className="flex justify-between items-start mb-4">
             <div>
               <h4 className="text-xs font-black text-red-600 uppercase tracking-wider flex items-center">
-                <i className="fas fa-triangle-exclamation mr-2"></i> Security Audit Required
+                <i className="fas fa-triangle-exclamation mr-2"></i> Fix Security Policy Error
               </h4>
-              <p className="text-[10px] text-slate-500 mt-1">Google's "Policy Compliance" error is fixed via these 3 steps:</p>
+              <p className="text-[10px] text-slate-500 mt-1 italic font-medium">Google requires these 3 steps for safety:</p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">1. Enter Client ID</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Step 1: Save Client ID</label>
               <div className="flex gap-2">
                 <input 
                   type="text"
@@ -126,42 +126,42 @@ Please check the red 'Security Audit' checklist in the settings panel.`);
                   onClick={handleSaveConfig}
                   className="px-4 py-2.5 bg-red-600 text-white text-[10px] font-black rounded-xl hover:bg-red-700 transition-all uppercase"
                 >
-                  Apply
+                  Save
                 </button>
               </div>
             </div>
 
             <div className="p-4 bg-white rounded-xl border border-red-200 space-y-4 shadow-sm">
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-red-200">2</div>
-                  <div className="text-[10px] text-slate-600 leading-normal">
-                    <p className="font-bold text-slate-900">Add Authorized Origin</p>
-                    Go to <b>Credentials</b>, edit your Client ID, and add this exact URL to <b>Authorized JavaScript origins</b>:
-                    <div className="mt-2 flex items-center bg-slate-50 p-2 rounded border border-slate-200 group">
-                      <code className="text-blue-600 font-mono flex-1 truncate mr-2">{currentOrigin}</code>
-                      <button onClick={handleCopyOrigin} className="text-[9px] font-black text-blue-600 hover:underline">
-                        {copyStatus === 'copied' ? 'COPIED' : 'COPY'}
-                      </button>
-                    </div>
+              <div className="flex gap-3">
+                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-blue-200">2</div>
+                <div className="text-[10px] text-slate-600 leading-relaxed">
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Add JavaScript Origin</p>
+                  Copy the URL below and paste it into <b>'Authorized JavaScript origins'</b> in your Client ID settings:
+                  <div className="mt-2 flex items-center bg-slate-50 p-2 rounded border border-slate-200">
+                    <code className="text-blue-600 font-mono flex-1 truncate mr-2 text-[9px]">{currentOrigin}</code>
+                    <button onClick={handleCopyOrigin} className="text-[9px] font-black text-blue-600 hover:underline px-2 py-1 bg-white border border-slate-200 rounded">
+                      {copyStatus === 'copied' ? 'COPIED' : 'COPY'}
+                    </button>
                   </div>
+                  <p className="mt-2 text-[9px] text-red-500 font-bold uppercase">Important: Clear "Authorized redirect URIs" list completely.</p>
                 </div>
+              </div>
 
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-red-200">3</div>
-                  <div className="text-[10px] text-slate-600 leading-normal">
-                    <p className="font-bold text-slate-900">Add Test User</p>
-                    Go to the <b>OAuth consent screen</b> tab. Scroll to <b>Test users</b>, click <b>Add Users</b>, and type your email address.
-                  </div>
+              <div className="flex gap-3 pt-2 border-t border-slate-100">
+                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-blue-200">3</div>
+                <div className="text-[10px] text-slate-600 leading-relaxed">
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Add Test User</p>
+                  Go to the <b>'OAuth consent screen'</b> tab. 
+                  <ul className="list-disc pl-4 mt-1 space-y-1">
+                    <li>Set 'Publishing Status' to <b>Testing</b>.</li>
+                    <li>Under 'Test users', click <b>Add Users</b> and add your email.</li>
+                  </ul>
                 </div>
-
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-amber-200">!</div>
-                  <div className="text-[10px] text-slate-600 leading-normal italic">
-                    <p className="font-bold text-amber-700 uppercase tracking-tighter">Crucial Step:</p>
-                    Ensure <b>Authorized redirect URIs</b> is <u>Empty</u>. If there is a URL in that box, delete it.
-                  </div>
-                </div>
+              </div>
+              
+              <div className="bg-amber-50 p-3 rounded-lg border border-amber-200 flex items-start gap-2">
+                <i className="fas fa-info-circle text-amber-500 mt-0.5"></i>
+                <p className="text-[9px] text-amber-800 font-medium">Wait <b>5-10 minutes</b> after saving in the Google Cloud Console. Changes are not instant.</p>
               </div>
             </div>
           </div>
@@ -180,13 +180,13 @@ Please check the red 'Security Audit' checklist in the settings panel.`);
           className="w-full h-64 p-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none font-mono text-sm leading-relaxed"
         />
         {isLoading && (
-          <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center space-y-4 z-10">
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center space-y-4 z-10 animate-in fade-in">
             <div className="flex space-x-1.5">
               <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce"></div>
               <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
-            <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest">Processing...</span>
+            <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest">Processing Context...</span>
           </div>
         )}
       </div>
@@ -197,7 +197,7 @@ Please check the red 'Security Audit' checklist in the settings panel.`);
         className={`mt-4 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.15em] flex items-center justify-center transition-all ${
           isLoading || !content.trim() 
             ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
+            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl active:scale-[0.98]'
         }`}
       >
         <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'} mr-2.5`}></i>

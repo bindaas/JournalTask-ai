@@ -37,21 +37,21 @@ export async function pickFileFromDrive(): Promise<string | null> {
         throw new Error('Google Identity Services not loaded. Try refreshing the page.');
       }
 
+      // Modern token client configuration
       const tokenClient = window.google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: async (response: any) => {
           if (response.error !== undefined) {
-            console.error('OAuth Detail Error:', response);
-            const errorMsg = response.error_description || response.error;
-            reject(new Error(`OAuth Error: ${errorMsg}. Check console for details.`));
+            console.error('OAuth Callback Error:', response);
+            reject(new Error(`OAuth Error: ${response.error_description || response.error}`));
             return;
           }
           
           const accessToken = response.access_token;
           
           if (!window.gapi) {
-             reject(new Error('Google GAPI loader not found.'));
+             reject(new Error('Google GAPI (legacy) loader not found.'));
              return;
           }
 
@@ -85,8 +85,11 @@ export async function pickFileFromDrive(): Promise<string | null> {
         },
       });
 
-      // Using 'select_account' is more robust for compliance than just 'consent'
-      tokenClient.requestAccessToken({ prompt: 'select_account' });
+      // Force consent and account selection for unverified apps
+      tokenClient.requestAccessToken({ 
+        prompt: 'select_account',
+        hint: '', // Ensure no account hint interferes with the selection
+      });
     } catch (error: any) {
       reject(error);
     }
@@ -105,7 +108,7 @@ async function fetchFileContent(fileId: string, mimeType: string, accessToken: s
   });
 
   if (!response.ok) {
-    throw new Error(`Drive API Error: ${response.status}`);
+    throw new Error(`Drive Content Error: ${response.status}`);
   }
 
   return await response.text();
