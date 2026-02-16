@@ -1,12 +1,11 @@
-
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/journaltask-ai:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/journaltask-ai:$BUILD_ID', '.']
 
   # Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/journaltask-ai:$COMMIT_SHA']
+    args: ['push', 'gcr.io/$PROJECT_ID/journaltask-ai:$BUILD_ID']
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -16,7 +15,7 @@ steps:
       - 'deploy'
       - 'journaltask-ai'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/journaltask-ai:$COMMIT_SHA'
+      - 'gcr.io/$PROJECT_ID/journaltask-ai:$BUILD_ID'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -24,4 +23,4 @@ steps:
       - '--allow-unauthenticated'
 
 images:
-  - 'gcr.io/$PROJECT_ID/journaltask-ai:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/journaltask-ai:$BUILD_ID'
