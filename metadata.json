@@ -1,5 +1,7 @@
 {
   "name": "JournalTask AI",
   "description": "An intelligent task management system that extracts actionable items, deadlines, and dependencies from journal entries using Gemini AI.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }
