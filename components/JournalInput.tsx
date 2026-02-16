@@ -140,11 +140,11 @@ Please check the 'Security Checklist' in the settings panel (shield icon).`);
               <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-blue-200">3</div>
                 <div className="text-[10px] text-slate-600 leading-relaxed">
-                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Origins &amp; Users</p>
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Origins {"&"} Users</p>
                   In GCP Console:
                   <ul className="list-disc pl-4 mt-1 space-y-1">
-                    <li>Add <b>{currentOrigin}</b> to 'Authorized JavaScript origins'.</li>
-                    <li>Add your email to 'Test users' on the OAuth consent screen.</li>
+                    <li>Add <b>{currentOrigin}</b> to {"'Authorized JavaScript origins'"}.</li>
+                    <li>Add your email to {"'Test users'"} on the OAuth consent screen.</li>
                   </ul>
                 </div>
               </div>
@@ -153,7 +153,7 @@ Please check the 'Security Checklist' in the settings panel (shield icon).`);
                 <i className="fas fa-key text-amber-500 mt-0.5"></i>
                 <div className="text-[9px] text-amber-800 leading-normal">
                   <p className="font-bold uppercase tracking-tight mb-1">Blocked API Key?</p>
-                  If you see "Requests to this API are blocked", your key likely has <b>"API Restrictions"</b>. Go to Credentials &rarr; Your API Key &rarr; Set to "Don't restrict key" or manually add <b>Generative Language API</b>.
+                  If you see {"\"Requests to this API are blocked\""}, your key likely has <b>{"\"API Restrictions\""}</b>. Go to Credentials {"\u2192"} Your API Key {"\u2192"} Set to {"\"Don't restrict key\""} or manually add <b>Generative Language API</b>.
                 </div>
               </div>
             </div>
