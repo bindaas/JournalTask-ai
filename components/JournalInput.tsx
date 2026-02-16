@@ -51,14 +51,14 @@ export const JournalInput: React.FC<JournalInputProps> = ({ onSync, isSyncing, i
       console.error("Drive Import Error:", error);
       const msg = error.message?.toLowerCase() || '';
       
-      const isPolicyError = msg.includes('policy') || msg.includes('comply') || msg.includes('secure') || msg.includes('400');
+      const isPolicyError = msg.includes('policy') || msg.includes('comply') || msg.includes('secure') || msg.includes('400') || msg.includes('developer key') || msg.includes('blocked');
       
       if (isPolicyError) {
         setShowSettings(true);
-        alert(`CRITICAL SECURITY BLOCK: 
-Google is blocking this sign-in for security.
+        alert(`CONFIGURATION ERROR DETECTED: 
+${error.message}
 
-Common fix: Add your email to 'Test users' on the 'OAuth consent screen' tab in your Google Cloud Console.`);
+Please check the 'Security Checklist' in the settings panel (shield icon).`);
       } else {
         alert(error.message || 'An unknown error occurred');
       }
@@ -105,63 +105,63 @@ Common fix: Add your email to 'Test users' on the 'OAuth consent screen' tab in 
           <div className="flex justify-between items-start mb-4">
             <div>
               <h4 className="text-xs font-black text-red-600 uppercase tracking-wider flex items-center">
-                <i className="fas fa-triangle-exclamation mr-2"></i> Fix Security Policy Error
+                <i className="fas fa-triangle-exclamation mr-2"></i> Fix Configuration Errors
               </h4>
-              <p className="text-[10px] text-slate-500 mt-1 italic font-medium">Google requires these 3 steps for safety:</p>
+              <p className="text-[10px] text-slate-500 mt-1 italic font-medium">Follow these steps to enable AI and Google Drive:</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Step 1: Save Client ID</label>
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  placeholder="0000000-xxxx.apps.googleusercontent.com"
-                  className="flex-1 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 font-mono"
-                />
-                <button 
-                  onClick={handleSaveConfig}
-                  className="px-4 py-2.5 bg-red-600 text-white text-[10px] font-black rounded-xl hover:bg-red-700 transition-all uppercase"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-
             <div className="p-4 bg-white rounded-xl border border-red-200 space-y-4 shadow-sm">
               <div className="flex gap-3">
+                <div className="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-red-200">1</div>
+                <div className="text-[10px] text-slate-600 leading-relaxed">
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Enable APIs (Critical)</p>
+                  Go to the <b>API Library</b> in Google Cloud and enable:
+                  <ul className="list-disc pl-4 mt-1 font-bold text-slate-700">
+                    <li>Generative Language API <span className="text-red-500">(For Gemini)</span></li>
+                    <li>Google Picker API <span className="text-blue-500">(For Drive)</span></li>
+                    <li>Google Drive API <span className="text-blue-500">(For Drive)</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-blue-200">2</div>
                 <div className="text-[10px] text-slate-600 leading-relaxed">
-                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Add JavaScript Origin</p>
-                  Copy the URL below and paste it into <b>'Authorized JavaScript origins'</b> in your Client ID settings:
-                  <div className="mt-2 flex items-center bg-slate-50 p-2 rounded border border-slate-200">
-                    <code className="text-blue-600 font-mono flex-1 truncate mr-2 text-[9px]">{currentOrigin}</code>
-                    <button onClick={handleCopyOrigin} className="text-[9px] font-black text-blue-600 hover:underline px-2 py-1 bg-white border border-slate-200 rounded">
-                      {copyStatus === 'copied' ? 'COPIED' : 'COPY'}
-                    </button>
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Enter Client ID</p>
+                  Create a <b>Web Application</b> OAuth Client ID and paste it here:
+                  <div className="flex gap-2 mt-2">
+                    <input 
+                      type="text"
+                      value={clientId}
+                      onChange={(e) => setClientId(e.target.value)}
+                      placeholder="...apps.googleusercontent.com"
+                      className="flex-1 px-3 py-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg outline-none font-mono"
+                    />
+                    <button onClick={handleSaveConfig} className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black rounded-lg uppercase">Save</button>
                   </div>
-                  <p className="mt-2 text-[9px] text-red-500 font-bold uppercase">Important: Clear "Authorized redirect URIs" list completely.</p>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-bold border border-blue-200">3</div>
                 <div className="text-[10px] text-slate-600 leading-relaxed">
-                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Add Test User</p>
-                  Go to the <b>'OAuth consent screen'</b> tab. 
+                  <p className="font-bold text-slate-900 mb-1 uppercase tracking-tighter">Origins & Users</p>
+                  In GCP Console:
                   <ul className="list-disc pl-4 mt-1 space-y-1">
-                    <li>Set 'Publishing Status' to <b>Testing</b>.</li>
-                    <li>Under 'Test users', click <b>Add Users</b> and add your email.</li>
+                    <li>Add <b>{currentOrigin}</b> to 'Authorized JavaScript origins'.</li>
+                    <li>Add your email to 'Test users' on the OAuth consent screen.</li>
                   </ul>
                 </div>
               </div>
               
               <div className="bg-amber-50 p-3 rounded-lg border border-amber-200 flex items-start gap-2">
-                <i className="fas fa-info-circle text-amber-500 mt-0.5"></i>
-                <p className="text-[9px] text-amber-800 font-medium">Wait <b>5-10 minutes</b> after saving in the Google Cloud Console. Changes are not instant.</p>
+                <i className="fas fa-key text-amber-500 mt-0.5"></i>
+                <div className="text-[9px] text-amber-800 leading-normal">
+                  <p className="font-bold uppercase tracking-tight mb-1">Blocked API Key?</p>
+                  If you see "Requests to this API are blocked", your key likely has <b>"API Restrictions"</b>. Go to Credentials -> Your API Key -> Set to "Don't restrict key" or manually add <b>Generative Language API</b>.
+                </div>
               </div>
             </div>
           </div>
